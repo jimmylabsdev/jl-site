@@ -15,7 +15,7 @@ export default function Footer() {
           </div>
           <div className="font-mono text-[11px] tracking-[0.12em] text-muted text-left md:text-right">
             <div>© {new Date().getFullYear()} Jimmy Labs · All rights reserved</div>
-            <div className="mt-1">Bangalore · jimmy-labs.com</div>
+            {/* <div className="mt-1">Bangalore · jimmy-labs.com</div> */}
           </div>
         </div>
       </div>

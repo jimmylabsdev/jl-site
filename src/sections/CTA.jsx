@@ -68,12 +68,12 @@ export default function CTA() {
             <div className="mt-12 space-y-5">
               <ContactRow label="Email"    value="consult@jimmy-labs.com"  href="mailto:consult@jimmy-labs.com" />
               <ContactRow label="Web"      value="jimmy-labs.com"          href="https://jimmy-labs.com" />
-              <ContactRow label="LinkedIn" value="/company/jimmy-labs"     href="#" />
+              <ContactRow label="LinkedIn" value="/company/jimmylabs"      href="#" />
               <div className="flex items-center gap-4">
                 <span className="font-mono text-[10.5px] tracking-[0.18em] uppercase text-paper/50 w-20">
-                  Based
+                  HQ
                 </span>
-                <span className="text-paper/80">Bangalore · working globally</span>
+                <span className="text-paper/80">Bangalore · Working Globally</span>
               </div>
             </div>
           </div>

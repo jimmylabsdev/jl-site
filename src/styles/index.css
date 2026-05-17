@@ -79,7 +79,15 @@
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
-.marquee-track { animation: marquee 38s linear infinite; }
+.marquee-track {
+  animation: marquee 25s linear infinite;
+  will-change: transform;
+}
+@media (max-width: 768px) {
+  .marquee-track {
+    animation-duration: 18s;
+  }
+}
 
 /* Service card */
 .svc-card {

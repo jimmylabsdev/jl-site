@@ -36,7 +36,7 @@ export default function Nav() {
           </a>
         </div>
 
-        <button onClick={() => setOpen((o) => !o)} className="md:hidden p-2" aria-label="Menu">
+        <button onClick={() => setOpen((o) => !o)} className="md:hidden p-2" aria-label="Menu" aria-expanded={open}>
           <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
             <path
               d={open ? 'M4 4 L18 18 M18 4 L4 18' : 'M3 6 H19 M3 11 H19 M3 16 H19'}
@@ -48,7 +48,13 @@ export default function Nav() {
         </button>
       </div>
 
-      <div className={`md:hidden mobile-panel ${open ? 'open' : ''} bg-paper border-t hairline`}>
+      {/* Mobile dropdown panel: collapses to zero height when closed */}
+      <div
+        className={`md:hidden overflow-hidden bg-paper transition-[max-height,opacity] duration-300 ease-out ${
+          open ? 'max-h-96 opacity-100 border-t hairline' : 'max-h-0 opacity-0'
+        }`}
+        aria-hidden={!open}
+      >
         <div className="px-6 py-5 flex flex-col gap-4">
           {links.map(([label, href]) => (
             <a key={href} href={href} onClick={() => setOpen(false)} className="text-[15px]">
