@@ -3,19 +3,68 @@ import Field from '../components/Field.jsx'
 
 const WEBHOOK_URL = 'https://hook.eu2.make.com/sisk921fek6zxttapc860iqdqaya4br5'
 
+const EMAIL_RE = /^\S+@\S+\.\S+$/
+
+/**
+ * Validates a single field value. Returns an error string, or '' if valid.
+ */
+function validateField(name, value) {
+  const v = value.trim()
+  switch (name) {
+    case 'name':
+      if (!v) return 'Please enter your name.'
+      return ''
+    case 'email':
+      if (!v) return 'Please enter your email.'
+      if (!EMAIL_RE.test(v)) return 'Please enter a valid email address.'
+      return ''
+    case 'company':
+      if (!v) return 'Please enter your company.'
+      return ''
+    default:
+      return ''
+  }
+}
+
 export default function CTA() {
   const [submitted, setSubmitted] = useState(false)
   const [sending, setSending] = useState(false)
-  const [error, setError] = useState('')
+  const [submitError, setSubmitError] = useState('')
   const [form, setForm] = useState({ name: '', email: '', company: '', message: '' })
+  const [errors, setErrors] = useState({ name: '', email: '', company: '' })
+
+  // Update a field value, and clear that field's error if it had one.
+  const updateField = (key) => (value) => {
+    setForm((f) => ({ ...f, [key]: value }))
+    if (errors[key]) setErrors((e) => ({ ...e, [key]: '' }))
+  }
+
+  // Validate on blur — but only show an error if the user actually typed something
+  // and then cleared it, OR if the field has invalid content. We don't want to
+  // yell at someone for tabbing past an empty field they're about to come back to.
+  const validateOnBlur = (key) => () => {
+    const err = validateField(key, form[key])
+    // Only set blur errors if the field has content (i.e. format issues like bad email).
+    // Empty-field errors only fire on submit, which is less aggressive.
+    if (form[key].trim() || errors[key]) {
+      setErrors((e) => ({ ...e, [key]: err }))
+    }
+  }
 
   const onSubmit = async (e) => {
     e.preventDefault()
-    setError('')
+    setSubmitError('')
 
-    if (!form.name.trim()) return setError('Please enter your name.')
-    if (!form.email.trim()) return setError('Please enter your email.')
-    if (!/^\S+@\S+\.\S+$/.test(form.email)) return setError('Please enter a valid email address.')
+    // Validate all required fields
+    const newErrors = {
+      name:    validateField('name',    form.name),
+      email:   validateField('email',   form.email),
+      company: validateField('company', form.company),
+    }
+    setErrors(newErrors)
+
+    // If any field has an error, stop here
+    if (newErrors.name || newErrors.email || newErrors.company) return
 
     setSending(true)
     try {
@@ -31,7 +80,7 @@ export default function CTA() {
       if (!res.ok) throw new Error(`Request failed (${res.status})`)
       setSubmitted(true)
     } catch (err) {
-      setError("Something went wrong. Please try again, or email consult@jimmy-labs.com directly.")
+      setSubmitError("Something went wrong. Please try again, or email consult@jimmy-labs.com directly.")
     } finally {
       setSending(false)
     }
@@ -68,7 +117,7 @@ export default function CTA() {
             <div className="mt-12 space-y-5">
               <ContactRow label="Email"    value="consult@jimmy-labs.com"  href="mailto:consult@jimmy-labs.com" />
               <ContactRow label="Web"      value="jimmy-labs.com"          href="https://jimmy-labs.com" />
-              <ContactRow label="LinkedIn" value="/company/jimmylabs"      href="#" />
+              <ContactRow label="LinkedIn" value="/company/jimmy-labs"     href="#" />
               <div className="flex items-center gap-4">
                 <span className="font-mono text-[10.5px] tracking-[0.18em] uppercase text-paper/50 w-20">
                   HQ
@@ -91,20 +140,42 @@ export default function CTA() {
                   <p className="text-[14px] text-ink/70">We'll respond within one business day.</p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <Field label="Name"       value={form.name}    onChange={(v) => setForm({ ...form, name: v })} />
-                  <Field label="Work email" value={form.email}   onChange={(v) => setForm({ ...form, email: v })} type="email" />
-                  <Field label="Company"    value={form.company} onChange={(v) => setForm({ ...form, company: v })} />
+                <div className="space-y-5">
+                  <Field
+                    label="Name"
+                    value={form.name}
+                    onChange={updateField('name')}
+                    onBlur={validateOnBlur('name')}
+                    error={errors.name}
+                    required
+                  />
+                  <Field
+                    label="Work email"
+                    value={form.email}
+                    onChange={updateField('email')}
+                    onBlur={validateOnBlur('email')}
+                    type="email"
+                    error={errors.email}
+                    required
+                  />
+                  <Field
+                    label="Company"
+                    value={form.company}
+                    onChange={updateField('company')}
+                    onBlur={validateOnBlur('company')}
+                    error={errors.company}
+                    required
+                  />
                   <Field
                     label="What are you trying to operationalize?"
                     value={form.message}
-                    onChange={(v) => setForm({ ...form, message: v })}
+                    onChange={updateField('message')}
                     textarea
                   />
 
-                  {error && (
+                  {submitError && (
                     <p className="text-[12.5px] text-accent mt-2 leading-snug" role="alert">
-                      {error}
+                      {submitError}
                     </p>
                   )}
 
@@ -116,8 +187,8 @@ export default function CTA() {
                     {sending ? 'Sending…' : 'Send →'}
                   </button>
                   <p className="text-[11.5px] text-muted leading-snug mt-3">
-                    By submitting, you agree to be contacted about your enquiry. We treat all submissions as
-                    confidential.
+                    Fields marked <span className="text-accent">*</span> are required. By submitting, you agree
+                    to be contacted about your enquiry. We treat all submissions as confidential.
                   </p>
                 </div>
               )}
